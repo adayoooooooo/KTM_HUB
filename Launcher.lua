@@ -4,8 +4,8 @@ if game:GetService("CoreGui"):FindFirstChild("UI_Launcher") then
 end
 
 -- [[ 🔗 GitHubのRaw URLを設定する場所 ]]
-local ORION_SCRIPT_URL = "★ここにOrionのRawURL★"
-local RAYFIELD_SCRIPT_URL = "★ここにRayfieldのRawURL★"
+local ORION_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/orion_ui.lua"
+local RAYFIELD_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/rayfeld_ui.lua"
 
 -- [[ 🛑 共通グローバル変数宣言 ]]
 local player = game.Players.LocalPlayer
