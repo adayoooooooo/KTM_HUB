@@ -3,9 +3,9 @@ if game:GetService("CoreGui"):FindFirstChild("UI_Launcher") then
     game:GetService("CoreGui").UI_Launcher:Destroy()
 end
 
--- [[ 🔗 GitHubのRaw URLを設定する場所 ]]
+-- [[ 🔗 構築されたGitHubのRaw URL ]]
 local ORION_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/orion_ui.lua"
-local RAYFIELD_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/rayfeld_ui.lua"
+local RAYFIELD_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/rayfield_ui.lua"
 
 -- [[ 🛑 共通グローバル変数宣言 ]]
 local player = game.Players.LocalPlayer
@@ -96,7 +96,7 @@ Title.Text = "KTM HUB - Select UI Library"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16.000
 
--- Orion UI ボタン
+-- 【Orion UI 選択ボタン】
 OrionBtn.Name = "OrionBtn"
 OrionBtn.Parent = MainFrame
 OrionBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
@@ -108,7 +108,7 @@ OrionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 OrionBtn.TextSize = 14.000
 UICorner2.Parent = OrionBtn
 
--- Rayfield UI ボタン
+-- 【Rayfield UI 選択ボタン】
 RayfieldBtn.Name = "RayfieldBtn"
 RayfieldBtn.Parent = MainFrame
 RayfieldBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
@@ -121,9 +121,8 @@ RayfieldBtn.TextSize = 14.000
 UICorner3.Parent = RayfieldBtn
 
 -- ==========================================
--- 🚀 ボタンクリック時の読み込み処理
+-- 🚀 UI 起動処理
 -- ==========================================
-
 OrionBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
     loadstring(game:HttpGet(ORION_SCRIPT_URL))()
