@@ -1,3 +1,23 @@
+-- 1. 自作ランチャー画面の消去
+if game:GetService("CoreGui"):FindFirstChild("UI_Launcher") then
+    game:GetService("CoreGui").UI_Launcher:Destroy()
+end
+
+-- 2. Orion UIのオブジェクトを消去
+if game:GetService("CoreGui"):FindFirstChild("Orion") then
+    game:GetService("CoreGui").Orion:Destroy()
+end
+
+-- 3. Rayfield UIのオブジェクトを消去
+-- (Rayfieldは環境によってCoreGuiかPlayerGuiのどちらかに「Rayfield」という名前で作られます)
+if game:GetService("CoreGui"):FindFirstChild("Rayfield") then
+    game:GetService("CoreGui").Rayfield:Destroy()
+elseif game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("Rayfield") then
+    game:GetService("Players").LocalPlayer.PlayerGui.Rayfield:Destroy()
+end
+
+task.wait(0.1) -- 消去が完了するまで一瞬だけ待機
+
 -- [[ 🛑 旧オブジェクトのクリーンアップ ]]a
 if game:GetService("CoreGui"):FindFirstChild("UI_Launcher") then
     game:GetService("CoreGui").UI_Launcher:Destroy()
