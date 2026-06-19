@@ -3,7 +3,7 @@ if game:GetService("CoreGui"):FindFirstChild("UI_Launcher") then
     game:GetService("CoreGui").UI_Launcher:Destroy()
 end
 
--- [[ 🔗 構築されたGitHubのRaw URL ]]
+-- [[ 🔗 あなたのGitHubのRaw URL（修正済みでそのまま動きます） ]]
 local ORION_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/orion_ui.lua"
 local RAYFIELD_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/rayfield_ui.lua"
 
@@ -125,10 +125,20 @@ UICorner3.Parent = RayfieldBtn
 -- ==========================================
 OrionBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
-    loadstring(game:HttpGet(ORION_SCRIPT_URL))()
+    local success, err = pcall(function()
+        loadstring(game:HttpGet(ORION_SCRIPT_URL))()
+    end)
+    if not success then
+        warn("Orionのロードに失敗しました: " .. tostring(err))
+    end
 end)
 
 RayfieldBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
-    loadstring(game:HttpGet(RAYFIELD_SCRIPT_URL))()
+    local success, err = pcall(function()
+        loadstring(game:HttpGet(RAYFIELD_SCRIPT_URL))()
+    end)
+    if not success then
+        warn("Rayfieldのロードに失敗しました: " .. tostring(err))
+    end
 end)
