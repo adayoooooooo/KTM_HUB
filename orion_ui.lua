@@ -10,7 +10,7 @@ local Window = OrionLibrary:MakeWindow({
 
 local PlayerTab = Window:MakeTab({
     Name = "Player",
-    Icon = "rbxassetid://16630859927",
+    Icon = "rbxassetid://13585614827",
     PremiumOnly = false
 })
 
