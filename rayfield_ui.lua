@@ -11,7 +11,7 @@ local Window = RayfieldLibrary:CreateWindow({
         FileName = "Config"
     }
 })
-window:Createtab("a")
+window:Createtab("a", 13585613929)
 local PlayerTab = Window:CreateTab("Player", 13585613929)
 
 PlayerTab:CreateToggle({
