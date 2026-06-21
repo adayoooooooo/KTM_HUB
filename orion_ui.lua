@@ -25,6 +25,12 @@ local TeleportTab = Window:MakeTab({
     PremiumOnly = false
 }) 
 
+local keybindsTab = flingThingsWindow:MakeTab({
+    Name = "Keybinds",
+    Icon = "rbxassetid://11710306232",
+    PremiumOnly = false
+})
+
 -- --- Player タブの要素 ---
 PlayerTab:AddToggle({
     Name = "WalkspeedOverride",
