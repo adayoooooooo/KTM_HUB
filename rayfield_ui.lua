@@ -16,8 +16,8 @@ local Window = RayfieldLibrary:CreateWindow({
 local SelectedPlayerName = ""
 
 -- --- タブ作成（アイコンIDを変更しました） ---
-local PlayerTab = Window:CreateTab("Player", 13585613884)
-local TeleportTab = Window:CreateTab("Teleport", 4562931890) 
+local PlayerTab = Window:CreateTab("Player", 16630859858)
+local TeleportTab = Window:CreateTab("Teleport", 7733992829) 
 
 -- --- Player タブの要素 ---
 PlayerTab:CreateToggle({
