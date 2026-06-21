@@ -11,8 +11,8 @@ local Window = RayfieldLibrary:CreateWindow({
         FileName = "Config"
     }
 })
-local PlayerTab = Window:CreateTab("Player", "13585613929")
-local TeleportTab = Window:CreateTab("Player", "4562931890")
+local PlayerTab = Window:CreateTab("Player", 13585613929)
+local TeleportTab = Window:CreateTab("Player", "4562931890)
 PlayerTab:CreateToggle({
     Name = "WalkspeedOverride",
     CurrentValue = false,
