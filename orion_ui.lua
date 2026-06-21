@@ -10,10 +10,12 @@ local Window = OrionLibrary:MakeWindow({
 
 local PlayerTab = Window:MakeTab({
     Name = "Player",
-    Icon = "rbxassetid://13585614827",
+    Icon = "rbxassetid://13585613884",
     PremiumOnly = false
 })
-
+local TeleportTab = Window:MakeTab({
+        icon = rbxassetid//4562931890
+)} 
 PlayerTab:AddToggle({
     Name = "WalkspeedOverride",
     Default = false,
