@@ -15,13 +15,13 @@ local SelectedPlayerName = ""
 -- OrionUIの仕様バグ対策: 数字IDではなくLucideアイコン名("user", "locate")を指定して確実に表示させます。
 local PlayerTab = Window:MakeTab({
     Name = "Player",
-    Icon = "user", -- もし数字IDを使いたい場合は "rbxassetid://13585613884" と書いてみてください
+    Icon = "rbxassetid://16630859858",
     PremiumOnly = false
 })
 
 local TeleportTab = Window:MakeTab({
     Name = "Teleport",
-    Icon = "locate", -- もし数字IDを使いたい場合は "rbxassetid://4562931890" と書いてみてください
+    Icon = "rbxassetid://7733992829",
     PremiumOnly = false
 }) 
 
