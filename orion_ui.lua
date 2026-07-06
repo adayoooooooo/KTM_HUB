@@ -1,91 +1,39 @@
-local OrionLibrary = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/refs/heads/main/source')))()
+local OrionLibrary = loadstring(game:HttpGet(('https://raw.githubusercontent.com/BlizTBr/scripts/main/Orion%20X')))()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 local Window = OrionLibrary:MakeWindow({
-    Name = "KTM_HUB (FTAP)",
+    Name = "(＃°Д°)HUB (FTAP)",
     HidePremium = false, 
     SaveConfig = true,
-    ConfigFolder = "KTM_Hub"
+    ConfigFolder = "emojiHUB",
+    KeyToOpenWindow = "RightShift",
+    FreeMouse = true
 })
 
--- 選択されたプレイヤーの「正確なユーザー名」を保持する変数
-local SelectedPlayerName = ""
+local SelectedPlayerName = ""      
+local SelectedBlobmanTarget = ""   
 
 -- --- タブ作成 ---
--- Orionでアイコンを表示させるため、Iconパラメータに直接アセットURLを指定
-local PlayerTab = Window:MakeTab({
-    Name = "Player",
-    Icon = "rbxassetid://13585613884", 
-    PremiumOnly = false
-})
+local PlayerTab = Window:MakeTab({ Name = "Player", Icon = "rbxassetid://13585613884", PremiumOnly = false })
+local TeleportTab = Window:MakeTab({ Name = "Teleport", Icon = "rbxassetid://7733992829", PremiumOnly = false }) 
+local DefenseTab = Window:MakeTab({ Name = "Defense", Icon = "rbxassetid://7734056608", PremiumOnly = false })
 
-local TeleportTab = Window:MakeTab({
-    Name = "Teleport",
-    Icon = "rbxassetid://7733992829",
-    PremiumOnly = false
-}) 
-
--- --- Player タブの要素 ---
-PlayerTab:AddToggle({
-    Name = "WalkspeedOverride",
-    Default = false,
-    Callback = function(Value) _G.WalkspeedOverride = Value end
-})
-
-PlayerTab:AddSlider({
-    Name = "Speed Multiplier",
-    Min = 1, Max = 10, Default = 1,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 1, ValueName = "Speed",
-    Callback = function(Value) _G.SpeedMultiplier = Value end    
-})
-
-PlayerTab:AddToggle({
-    Name = "JumpPowerOverride",
-    Default = false,
-    Callback = function(Value) _G.JumpPowerOverride = Value end
-})
-
-PlayerTab:AddSlider({
-    Name = "Jump Multiplier",
-    Min = 1, Max = 10, Default = 1,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 1, ValueName = "Jump",
-    Callback = function(Value) _G.JumpMultiplier = Value end    
-})
-
-PlayerTab:AddToggle({
-    Name = "Infinite Jump",
-    Default = false,
-    Callback = function(Value) _G.InfiniteJump = Value end
-})
-
+-- --- Player タブ ---
+PlayerTab:AddToggle({ Name = "WalkspeedOverride", Default = false, Callback = function(Value) _G.WalkspeedOverride = Value end })
+PlayerTab:AddSlider({ Name = "Speed Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Speed", Callback = function(Value) _G.SpeedMultiplier = Value end })
+PlayerTab:AddToggle({ Name = "JumpPowerOverride", Default = false, Callback = function(Value) _G.JumpPowerOverride = Value end })
+PlayerTab:AddSlider({ Name = "Jump Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Callback = function(Value) _G.JumpMultiplier = Value end })
+PlayerTab:AddToggle({ Name = "Infinite Jump", Default = false, Callback = function(Value) _G.InfiniteJump = Value end })
 PlayerTab:AddLabel("--- Camera Settings (TPS) ---")
+PlayerTab:AddToggle({ Name = "Enable TPS (Max 500 Studs)", Default = false, Callback = function(Value) _G.TPSToggle = Value if not Value and player then player.CameraMode = Enum.CameraMode.Classic player.CameraMaxZoomDistance = 12 player.CameraMinZoomDistance = 0.5 end end })
 
-PlayerTab:AddToggle({
-    Name = "Enable TPS (Max 500 Studs)",
-    Default = false,
-    Callback = function(Value)
-        _G.TPSToggle = Value
-        if not Value and player then
-            player.CameraMode = Enum.CameraMode.Classic
-            player.CameraMaxZoomDistance = 12
-            player.CameraMinZoomDistance = 0.5
-        end
-    end
-})
-
--- --- Teleport タブの要素（プレイヤー名変換処理付き） ---
-
--- 「表示名 (@ユーザー名)」のリストと、そこからユーザー名を逆引きするテーブルを作成
+-- --- ドロップダウンデータ生成 ---
 local function GetPlayerDropdownData()
     local displayList = {}
-    local nameMap = {} -- 表示名からユーザー名を検索するためのマップ
-    
+    local nameMap = {} 
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= player then
-            -- 例: "ひろし (@Hiroshi_Roblox)"
             local formattedName = p.DisplayName .. " (@" .. p.Name .. ")"
             table.insert(displayList, formattedName)
             nameMap[formattedName] = p.Name
@@ -93,35 +41,13 @@ local function GetPlayerDropdownData()
     end
     return displayList, nameMap
 end
-
 local currentDisplayList, currentNameMap = GetPlayerDropdownData()
 
--- プレイヤー選択ドロップダウン
+-- --- Teleport タブ ---
 local PlayerDropdown = TeleportTab:AddDropdown({
-    Name = "Select Player",
-    Default = "None",
-    Options = currentDisplayList,
-    Callback = function(Value)
-        -- 選択された表記から、内部処理用の正確なユーザー名を取得
-        if currentNameMap[Value] then
-            SelectedPlayerName = currentNameMap[Value]
-        else
-            SelectedPlayerName = ""
-        end
-    end
+    Name = "Select Player", Default = "None", Options = currentDisplayList,
+    Callback = function(Value) SelectedPlayerName = currentNameMap[Value] or "" end
 })
-
--- ドロップダウン自動更新関数
-local function RefreshDropdown()
-    if PlayerDropdown then
-        currentDisplayList, currentNameMap = GetPlayerDropdownData()
-        PlayerDropdown:Refresh(currentDisplayList, true)
-    end
-end
-Players.PlayerAdded:Connect(RefreshDropdown)
-Players.PlayerRemoving:Connect(RefreshDropdown)
-
--- テレポートボタン（背後にテレポート）
 TeleportTab:AddButton({
     Name = "Teleport Behind Player",
     Callback = function()
@@ -129,12 +55,60 @@ TeleportTab:AddButton({
             local targetPlayer = Players:FindFirstChild(SelectedPlayerName)
             if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local targetHRP = targetPlayer.Character.HumanoidRootPart
-                    player.Character.HumanoidRootPart.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+                    player.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
                 end
             end
         end
     end
 })
+
+-- --- Defense タブ ---
+local RS = game:GetService("ReplicatedStorage")
+local R = game:GetService("RunService")
+local CE = RS:WaitForChild("CharacterEvents", 5) 
+local StruggleEvent = CE and CE:WaitForChild("Struggle", 5)
+local BeingHeld = player:WaitForChild("IsHeld", 5)
+
+local AntiExplosionEnabled = true
+local AntiGrabEnabled = true
+local AntiSitEnabled = true
+
+workspace.DescendantAdded:Connect(function(v) if AntiExplosionEnabled and v:IsA("Explosion") then v.BlastPressure = 0 end end)
+if BeingHeld and StruggleEvent then
+    BeingHeld.Changed:Connect(function(C)
+        if AntiGrabEnabled and C == true then
+            local char = player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local Event; Event = R.RenderStepped:Connect(function()
+                    if AntiGrabEnabled and BeingHeld.Value == true then
+                        char["HumanoidRootPart"].AssemblyLinearVelocity = Vector3.new()
+                        StruggleEvent:FireServer(player)
+                    else Event:Disconnect() end
+                end)
+            end
+        end
+    end)
+end
+
+local function reconnect(Character)
+    if not Character then return end
+    local Humanoid = Character:WaitForChild("Humanoid", 10)
+    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart", 10)
+    if HumanoidRootPart then local firePart = HumanoidRootPart:WaitForChild("FirePlayerPart", 3) if firePart then firePart:Destroy() end end
+    if Humanoid then
+        Humanoid.Changed:Connect(function(C)
+            if AntiSitEnabled and C == "Sit" and Humanoid.Sit == true then
+                if Humanoid.SeatPart ~= nil and tostring(Humanoid.SeatPart.Parent) == "CreatureBlobman" then
+                elseif Humanoid.SeatPart == nil then Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true) Humanoid.Sit = false end
+            end
+        end)
+    end
+end
+if player.Character then task.spawn(reconnect, player.Character) end
+player.CharacterAdded:Connect(function(char) task.spawn(reconnect, char) end)
+
+DefenseTab:AddToggle({ Name = "Anti Explosion (No Knockback)", Default = true, Callback = function(Value) AntiExplosionEnabled = Value end })
+DefenseTab:AddToggle({ Name = "Anti Grab (Auto Struggle)", Default = true, Callback = function(Value) AntiGrabEnabled = Value end })
+DefenseTab:AddToggle({ Name = "Anti Sit (Auto Unsit)", Default = true, Callback = function(Value) AntiSitEnabled = Value end })
 
 OrionLibrary:Init()
