@@ -67,7 +67,7 @@ else
 	end
 end
 
-function OrionLib:IsRunning()
+function OrionLibrary:IsRunning()
 	if gethui then
 		return Orion.Parent == gethui()
 	else
@@ -77,7 +77,7 @@ function OrionLib:IsRunning()
 end
 
 local function AddConnection(Signal, Function)
-	if (not OrionLib:IsRunning()) then
+	if (not OrionLibrary:IsRunning()) then
 		return
 	end
 	local SignalConnect = Signal:Connect(Function)
@@ -86,7 +86,7 @@ local function AddConnection(Signal, Function)
 end
 
 task.spawn(function()
-	while (OrionLib:IsRunning()) do
+	while (OrionLibrary:IsRunning()) do
 		wait()
 	end
 
