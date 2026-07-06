@@ -7,7 +7,7 @@ if generalChannel then
 end
 
 
-local OrionLibrary = loadstring(game:HttpGet(('https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/Orion')))()
+local OrionLibrary = loadstring(game:HttpGet(('https://raw.githubusercontent.com/BlizTBr/scripts/refs/heads/main/Orion%20X')))()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
