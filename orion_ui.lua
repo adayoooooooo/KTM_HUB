@@ -1,4 +1,4 @@
-local OrionLibrary = loadstring(game:HttpGet(('https://raw.githubusercontent.com/BlizTBr/scripts/main/Orion%20X')))()
+local OrionLibrary = loadstring(game:HttpGet(('https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/Orion')))()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
