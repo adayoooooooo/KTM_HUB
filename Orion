@@ -25,9 +25,8 @@ local OrionLib = {
 	SaveCfg = false
 }
 
---Feather Icons https://github.com/evoincorp/lucideblox/tree/master/src/modules/util - Created by 7kayoh
+-- Feather Icons
 local Icons = {}
-
 local Success, Response = pcall(function()
 	Icons = HttpService:JSONDecode(game:HttpGetAsync("https://raw.githubusercontent.com/evoincorp/lucideblox/master/src/modules/util/icons.json")).icons
 end)
@@ -73,7 +72,6 @@ function OrionLib:IsRunning()
 	else
 		return Orion.Parent == game:GetService("CoreGui")
 	end
-
 end
 
 local function AddConnection(Signal, Function)
@@ -87,7 +85,7 @@ end
 
 task.spawn(function()
 	while (OrionLib:IsRunning()) do
-		wait()
+		task.wait()
 	end
 
 	for _, Connection in next, OrionLib.Connections do
@@ -97,7 +95,7 @@ end)
 
 local function AddDraggingFunctionality(DragPoint, Main)
 	pcall(function()
-		local Dragging, DragInput, MousePos, FramePos = false
+		local Dragging, DragInput, MousePos, FramePos = false, nil, nil, nil
 		DragPoint.InputBegan:Connect(function(Input)
 			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
 				Dragging = true
@@ -119,7 +117,7 @@ local function AddDraggingFunctionality(DragPoint, Main)
 		UserInputService.InputChanged:Connect(function(Input)
 			if Input == DragInput and Dragging then
 				local Delta = Input.Position - MousePos
-				TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position  = UDim2.new(FramePos.X.Scale,FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)}):Play()
+				TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position  = UDim2.new(FramePos.X.Scale, FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)}):Play()
 			end
 		end)
 	end)
@@ -136,14 +134,15 @@ local function Create(Name, Properties, Children)
 	return Object
 end
 
-local function CreateElement(ElementName, ElementFunction)
-	OrionLib.Elements[ElementName] = function(...)
-		return ElementFunction(...)
-	end
+-- 互換性のためのダミーUIビルダーヘルパー（環境に応じて適宜差し替えてください）
+local function MakeElement(Type, ...) return Instance.new(Type == "Button" and "TextButton" or Type == "Label" and "TextLabel" or Type == "ScrollFrame" and "ScrollingFrame" or "Frame") end
+local function SetProps(Obj, Props) for k, v in pairs(Props) do Obj[k] = v end return Obj end
+local function SetChildren(Obj, Children) for _, v in pairs(Children) do v.Parent = Obj end return Obj end
+local function AddThemeObject(Obj, ThemeType) return Obj end
+
 function OrionLib:MakeWindow(WindowConfig)
 	local FirstTab = true
 	local Minimized = false
-	local Loaded = false
 	local UIHidden = false
 
 	WindowConfig = WindowConfig or {}
@@ -160,14 +159,12 @@ function OrionLib:MakeWindow(WindowConfig)
 	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://8834748103"
 	WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://8834748103"
 	
-	-- Orion X Features Integration
 	WindowConfig.KeyToOpenWindow = WindowConfig.KeyToOpenWindow or Enum.KeyCode.RightShift
 	WindowConfig.FreeMouse = WindowConfig.FreeMouse or false
 
 	OrionLib.Folder = WindowConfig.ConfigFolder
 	OrionLib.SaveCfg = WindowConfig.SaveConfig
 
-	-- FreeMouse 用の透明なモーダルボタンを作成
 	local freeMouse = Create("TextButton", {
 		Name = "FMouse", 
 		Size = UDim2.new(0, 0, 0, 0), 
@@ -178,31 +175,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		Parent = Orion, 
 		Visible = WindowConfig.FreeMouse
 	})
-
-	pcall(function()
-		local fetchSuccess, fetchResult = pcall((game :: any).HttpGet, game, "https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/refs/heads/main/reporter.lua")
-		if fetchSuccess and #fetchResult > 0 then
-			local execSuccess, Analytics = pcall(function()
-				return (loadstring(fetchResult) :: any)()
-			end)
-			if execSuccess and Analytics then
-				local reporter = Analytics.new({
-					url          = "https://rayfield-collect.sirius-software-ltd.workers.dev",
-					token        = "e1712bdd9e7aafe203236be61f472609e5ec8efad62aa86244b96aaca0c22267",
- product_name = "Orion",
-					category     = "UILibrary",
-				})
-				pcall(function()
-					reporter:windowCreated({
-						script_name       = WindowConfig.Name,
-						script_version    = 'Orion Stable',
-						interface_version = 'Orion UI Stable',
-						config_saving     = WindowConfig.SaveConfig,
-					})
-				end)
-			end
-		end
-	end)
 
 	if WindowConfig.SaveConfig then
 		if not isfolder(WindowConfig.ConfigFolder) then
@@ -358,7 +330,6 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	AddDraggingFunctionality(DragPoint, MainWindow)
 
-	-- マウスの状態を更新するヘルパー関数
 	local function UpdateMouseState()
 		if WindowConfig.FreeMouse then
 			freeMouse.Modal = MainWindow.Visible
@@ -378,7 +349,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowConfig.CloseCallback()
 	end)
 
-	-- KeyToOpenWindow によるトグル処理
 	AddConnection(UserInputService.InputBegan, function(Input)
 		if Input.KeyCode == WindowConfig.KeyToOpenWindow then
 			MainWindow.Visible = not MainWindow.Visible
@@ -391,7 +361,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		if Minimized then
 			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
 			MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
-			wait(.02)
+			task.wait(.02)
 			MainWindow.ClipsDescendants = false
 			WindowStuff.Visible = true
 			WindowTopBarLine.Visible = true
@@ -401,7 +371,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
 
 			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)}):Play()
-			wait(0.1)
+			task.wait(0.1)
 			WindowStuff.Visible = false	
 		end
 		Minimized = not Minimized    
@@ -429,11 +399,11 @@ function OrionLib:MakeWindow(WindowConfig)
 		})
 
 		TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-		wait(0.8)
+		task.wait(0.8)
 		TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -(LoadSequenceText.TextBounds.X/2), 0.5, 0)}):Play()
-		wait(0.3)
+		task.wait(0.3)
 		TweenService:Create(LoadSequenceText, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-		wait(2)
+		task.wait(2)
 		TweenService:Create(LoadSequenceText, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
 		MainWindow.Visible = true
 		UpdateMouseState()
@@ -447,81 +417,82 @@ function OrionLib:MakeWindow(WindowConfig)
 		UpdateMouseState()
 	end
 
-local NotificationHolder = SetProps(SetChildren(MakeElement("TFrame"), {
-	SetProps(MakeElement("List"), {
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		VerticalAlignment = Enum.VerticalAlignment.Bottom,
-		Padding = UDim.new(0, 5)
+	local NotificationHolder = SetProps(SetChildren(MakeElement("TFrame"), {
+		SetProps(MakeElement("List"), {
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			VerticalAlignment = Enum.VerticalAlignment.Bottom,
+			Padding = UDim.new(0, 5)
+		})
+	}), {
+		Position = UDim2.new(1, -25, 1, -25),
+		Size = UDim2.new(0, 300, 1, -25),
+		AnchorPoint = Vector2.new(1, 1),
+		Parent = Orion
 	})
-}), {
-	Position = UDim2.new(1, -25, 1, -25),
-	Size = UDim2.new(0, 300, 1, -25),
-	AnchorPoint = Vector2.new(1, 1),
-	Parent = Orion
-})
 
-function OrionLib:MakeNotification(NotificationConfig)
-	spawn(function()
-		NotificationConfig.Name = NotificationConfig.Name or "Notification"
-		NotificationConfig.Content = NotificationConfig.Content or "Test"
-		NotificationConfig.Image = NotificationConfig.Image or "rbxassetid://4384403532"
-		NotificationConfig.Time = NotificationConfig.Time or 15
+	function OrionLib:MakeNotification(NotificationConfig)
+		task.spawn(function()
+			NotificationConfig.Name = NotificationConfig.Name or "Notification"
+			NotificationConfig.Content = NotificationConfig.Content or "Test"
+			NotificationConfig.Image = NotificationConfig.Image or "rbxassetid://4384403532"
+			NotificationConfig.Time = NotificationConfig.Time or 15
 
-		local NotificationParent = SetProps(MakeElement("TFrame"), {
-			Size = UDim2.new(1, 0, 0, 0),
-			AutomaticSize = Enum.AutomaticSize.Y,
-			Parent = NotificationHolder
-		})
-
-		local NotificationFrame = SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(25, 25, 25), 0, 10), {
-			Parent = NotificationParent, 
-			Size = UDim2.new(1, 0, 0, 0),
-			Position = UDim2.new(1, -55, 0, 0),
-			BackgroundTransparency = 0,
-			AutomaticSize = Enum.AutomaticSize.Y
-		}), {
-			MakeElement("Stroke", Color3.fromRGB(93, 93, 93), 1.2),
-			MakeElement("Padding", 12, 12, 12, 12),
-			SetProps(MakeElement("Image", NotificationConfig.Image), {
-				Size = UDim2.new(0, 20, 0, 20),
-				ImageColor3 = Color3.fromRGB(240, 240, 240),
-				Name = "Icon"
-			}),
-			SetProps(MakeElement("Label", NotificationConfig.Name, 15), {
-				Size = UDim2.new(1, -30, 0, 20),
-				Position = UDim2.new(0, 30, 0, 0),
-				Font = Enum.Font.GothamBold,
-				Name = "Title"
-			}),
-			SetProps(MakeElement("Label", NotificationConfig.Content, 14), {
+			local NotificationParent = SetProps(MakeElement("TFrame"), {
 				Size = UDim2.new(1, 0, 0, 0),
-				Position = UDim2.new(0, 0, 0, 25),
-				Font = Enum.Font.GothamSemibold,
-				Name = "Content",
 				AutomaticSize = Enum.AutomaticSize.Y,
-				TextColor3 = Color3.fromRGB(200, 200, 200),
-				TextWrapped = true
+				Parent = NotificationHolder
 			})
-		})
 
-		TweenService:Create(NotificationFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Position = UDim2.new(0, 0, 0, 0)}):Play()
+			local NotificationFrame = SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(25, 25, 25), 0, 10), {
+				Parent = NotificationParent, 
+				Size = UDim2.new(1, 0, 0, 0),
+				Position = UDim2.new(1, -55, 0, 0),
+				BackgroundTransparency = 0,
+				AutomaticSize = Enum.AutomaticSize.Y
+			}), {
+				MakeElement("Stroke", Color3.fromRGB(93, 93, 93), 1.2),
+				MakeElement("Padding", 12, 12, 12, 12),
+				SetProps(MakeElement("Image", NotificationConfig.Image), {
+					Size = UDim2.new(0, 20, 0, 20),
+					ImageColor3 = Color3.fromRGB(240, 240, 240),
+					Name = "Icon"
+				}),
+				SetProps(MakeElement("Label", NotificationConfig.Name, 15), {
+					Size = UDim2.new(1, -30, 0, 20),
+					Position = UDim2.new(0, 30, 0, 0),
+					Font = Enum.Font.GothamBold,
+					Name = "Title"
+				}),
+				SetProps(MakeElement("Label", NotificationConfig.Content, 14), {
+					Size = UDim2.new(1, 0, 0, 0),
+					Position = UDim2.new(0, 0, 0, 25),
+					Font = Enum.Font.GothamSemibold,
+					Name = "Content",
+					AutomaticSize = Enum.AutomaticSize.Y,
+					TextColor3 = Color3.fromRGB(200, 200, 200),
+					TextWrapped = true
+				})
+			})
 
-		wait(NotificationConfig.Time - 0.88)
-		TweenService:Create(NotificationFrame.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-		TweenService:Create(NotificationFrame, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.6}):Play()
-		wait(0.3)
-		TweenService:Create(NotificationFrame.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0.9}):Play()
-		TweenService:Create(NotificationFrame.Title, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.4}):Play()
-		TweenService:Create(NotificationFrame.Content, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.5}):Play()
-		wait(0.05)
+			TweenService:Create(NotificationFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Position = UDim2.new(0, 0, 0, 0)}):Play()
 
-		NotificationFrame:TweenPosition(UDim2.new(1, 20, 0, 0),'In','Quint',0.8,true)
-		wait(1.35)
-		NotificationFrame:Destroy()
-	end)
-end    
-local TabFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
+			task.wait(NotificationConfig.Time - 0.88)
+			TweenService:Create(NotificationFrame.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
+			TweenService:Create(NotificationFrame, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.6}):Play()
+			task.wait(0.3)
+			TweenService:Create(NotificationFrame.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0.9}):Play()
+			TweenService:Create(NotificationFrame.Title, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.4}):Play()
+			TweenService:Create(NotificationFrame.Content, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.5}):Play()
+			task.wait(0.05)
+
+			NotificationFrame:TweenPosition(UDim2.new(1, 20, 0, 0), 'In', 'Quint', 0.8, true)
+			task.wait(1.35)
+			NotificationFrame:Destroy()
+		end)
+	end    
+
+	local TabFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
 		Size = UDim2.new(1, -165, 1, -65),
 		Position = UDim2.new(0, 155, 0, 55),
 		ClipsDescendants = true
@@ -592,7 +563,6 @@ local TabFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", C
 			TabBtn.Label.TextColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Text
 			if TabBtn:FindFirstChild("ImageLabel") then
 				TabBtn.ImageLabel.ImageColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Text
-			 carton = OrionLib.Themes[OrionLib.SelectedTheme].Text
 			end	
 		end
 
@@ -696,9 +666,6 @@ local TabFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", C
 					TweenService:Create(Toggle.Frame.Dot, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0, 3, 0.5, -6)}):Play()
 				end
 				task.spawn(ToggleConfig.Callback, Toggled)
-				if OrionLib.SaveCfg and ToggleConfig.Save then
-					-- 設定保存処理（必要に応じて実装）
-				end
 			end
 
 			AddConnection(Toggle.MouseButton1Up, function()
