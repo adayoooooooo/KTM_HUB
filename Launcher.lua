@@ -13,7 +13,7 @@ end
 
 -- 2. Orion UIのオブジェクトを消去
 if game:GetService("CoreGui"):FindFirstChild("Orion") then
-    game:GetService("CoreGui").Orion:Destroy()
+    game:GetService("CoreGui").OrionBliz:Destroy()
 end
 
 -- 3. Rayfield UIのオブジェクトを消去
