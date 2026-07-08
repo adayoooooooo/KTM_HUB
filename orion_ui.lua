@@ -35,8 +35,6 @@ PlayerTab:AddToggle({ Name = "JumpPowerOverride", Default = false, Callback = fu
 PlayerTab:AddSlider({ Name = "Jump Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Callback = function(Value) _G.JumpMultiplier = Value end })
 PlayerTab:AddToggle({ Name = "Infinite Jump", Default = false, Callback = function(Value) _G.InfiniteJump = Value end })
 PlayerTab:AddLabel("--- Camera Settings (TPS) ---")
-PlayerTab:AddToggle({ Name = "Enable TPS (Max 500 Studs)", Default = false, Callback = function(Value) _G.TPSToggle = Value if not Value and player then player.CameraMode = Enum.CameraMode.Classic player.CameraMaxZoomDistance = 12 player.CameraMinZoomDistance = 0.5 end end })
-
 -- --- ドロップダウンデータ生成 ---
 local function GetPlayerDropdownData()
     local displayList = {}
@@ -50,13 +48,47 @@ local function GetPlayerDropdownData()
     end
     return displayList, nameMap
 end
+
+-- 初期データの取得
 local currentDisplayList, currentNameMap = GetPlayerDropdownData()
 
 -- --- Teleport タブ ---
 local PlayerDropdown = TeleportTab:AddDropdown({
-    Name = "Select Player", Default = "None", Options = currentDisplayList,
-    Callback = function(Value) SelectedPlayerName = currentNameMap[Value] or "" end
+    Name = "Select Player", 
+    Default = "None", 
+    Options = currentDisplayList,
+    Callback = function(Value) 
+        SelectedPlayerName = currentNameMap[Value] or "" 
+    end
 })
+
+-- 【追加】プレイヤーリストを自動更新する関数
+local function RefreshDropdown()
+    currentDisplayList, currentNameMap = GetPlayerDropdownData()
+    -- 使用しているUIライブラリのRefreshメソッドを呼び出す（一般的には Refresh(options, clearCurrent)）
+    PlayerDropdown:Refresh(currentDisplayList, true)
+end
+
+-- 【追加】プレイヤーの参加・退出イベントを監視
+Players.PlayerAdded:Connect(RefreshDropdown)
+Players.PlayerRemoving:Connect(RefreshDropdown)
+
+
+-- --- TPSトグル（既存コード） ---
+PlayerTab:AddToggle({ 
+    Name = "Enable TPS (Max 500 Studs)", 
+    Default = false, 
+    Callback = function(Value) 
+        _G.TPSToggle = Value 
+        if not Value and player then 
+            player.CameraMode = Enum.CameraMode.Classic 
+            player.CameraMaxZoomDistance = 12 
+            player.CameraMinZoomDistance = 0.5 
+        end 
+    end 
+})
+
+-- --- テレポートボタン（既存コード） ---
 TeleportTab:AddButton({
     Name = "Teleport Behind Player",
     Callback = function()
