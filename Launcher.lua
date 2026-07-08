@@ -83,7 +83,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
             
             if _G.JumpPowerOverride then
                 humanoid.UseJumpPower = true
-                humanoid.JumpPower = 23 * _G.JumpMultiplier
+                humanoid.JumpPower = 0 * _G.JumpMultiplier
             else
                 humanoid.UseJumpPower = false
             end
