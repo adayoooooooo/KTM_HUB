@@ -1,303 +1,172 @@
-local OrionLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/hololove1021/HolonHUB/refs/heads/main/source.txt"))()
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local Window = OrionLibrary:MakeWindow({
-    Name = "(＃°Д°)HUB (FTAP)",
-    HidePremium = false, 
-    SaveConfig = true,
-    ConfigFolder = "emojiHUB",
-    KeyToOpenWindow = "RightShift",
-    FreeMouse = true
-})
-
 local TextChatService = game:GetService("TextChatService")
 local textChannels = TextChatService:FindFirstChild("TextChannels")
 local generalChannel = textChannels and textChannels:FindFirstChild("RBXGeneral")
 
-if generalChannel then
-    generalChannel:SendAsync("(＃°Д°)HUB(公開鯖テスト中)起動完了(•ω•)")
+-- 1. 自作ランチャー画面の消去
+if game:GetService("CoreGui"):FindFirstChild("UI_Launcher") then
+    game:GetService("CoreGui").UI_Launcher:Destroy()
+else
+    if generalChannel then
+        generalChannel:SendAsync("(＃°Д°)HUB(公開鯖テスト中)起動中だよ(•ω•)")
+    end
 end
 
-local SelectedPlayerName = ""      
-local SelectedBlobmanTarget = ""   
-
--- --- タブ作成 ---
-local PlayerTab = Window:MakeTab({ Name = "Player", Icon = "rbxassetid://13585613884", PremiumOnly = false })
-local TeleportTab = Window:MakeTab({ Name = "Teleport", Icon = "rbxassetid://7733992829", PremiumOnly = false }) 
-local DefenseTab = Window:MakeTab({ Name = "Defense", Icon = "rbxassetid://7734056608", PremiumOnly = false })
-local BlobmanTab = Window:MakeTab({ Name = "Blobman", Icon = "rbxassetid://13585613884", PremiumOnly = false })
-
--- --- Player タブ ---
-PlayerTab:AddToggle({ Name = "WalkspeedOverride", Default = false, Callback = function(Value) _G.WalkspeedOverride = Value end })
-PlayerTab:AddSlider({ Name = "Speed Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Speed", Callback = function(Value) _G.SpeedMultiplier = Value end })
-PlayerTab:AddToggle({ Name = "JumpPowerOverride", Default = false, Callback = function(Value) _G.JumpPowerOverride = Value end })
-PlayerTab:AddSlider({ Name = "Jump Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Callback = function(Value) _G.JumpMultiplier = Value end })
-PlayerTab:AddToggle({ Name = "Infinite Jump", Default = false, Callback = function(Value) _G.InfiniteJump = Value end })
-PlayerTab:AddLabel("--- Camera Settings (TPS) ---")
--- --- ドロップダウンデータ生成 ---
-local function GetPlayerDropdownData()
-    local displayList = {}
-    local nameMap = {} 
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= player then
-            local formattedName = p.DisplayName .. " (@" .. p.Name .. ")"
-            table.insert(displayList, formattedName)
-            nameMap[formattedName] = p.Name
-        end
-    end
-    return displayList, nameMap
+-- 2. Orion UIのオブジェクトを消去
+if game:GetService("CoreGui"):FindFirstChild("Orion") then
+    game:GetService("CoreGui").Orionliz:Destroy()
 end
 
--- 初期データの取得
-local currentDisplayList, currentNameMap = GetPlayerDropdownData()
-
--- --- Teleport タブ ---
-local PlayerDropdown = TeleportTab:AddDropdown({
-    Name = "Select Player", 
-    Default = "None", 
-    Options = currentDisplayList,
-    Callback = function(Value) 
-        SelectedPlayerName = currentNameMap[Value] or "" 
-    end
-})
-
--- 【追加】プレイヤーリストを自動更新する関数
-local function RefreshDropdown()
-    currentDisplayList, currentNameMap = GetPlayerDropdownData()
-    -- 使用しているUIライブラリのRefreshメソッドを呼び出す（一般的には Refresh(options, clearCurrent)）
-    PlayerDropdown:Refresh(currentDisplayList, true)
+-- 3. Rayfield UIのオブジェクトを消去
+-- (Rayfieldは環境によってCoreGuiかPlayerGuiのどちらかに「Rayfield」という名前で作られます)
+if game:GetService("CoreGui"):FindFirstChild("Rayfield") then
+    game:GetService("CoreGui").Rayfield:Destroy()
+elseif game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("Rayfield") then
+    game:GetService("Players").LocalPlayer.PlayerGui.Rayfield:Destroy()
 end
 
--- 【追加】プレイヤーの参加・退出イベントを監視
-Players.PlayerAdded:Connect(RefreshDropdown)
-Players.PlayerRemoving:Connect(RefreshDropdown)
+task.wait(0.1) -- 消去が完了するまで一瞬だけ待機
 
+-- [[ 🛑 旧オブジェクトのクリーンアップ ]]a
+if game:GetService("CoreGui"):FindFirstChild("UI_Launcher") then
+    game:GetService("CoreGui").UI_Launcher:Destroy()
+end
 
--- --- TPSトグル（既存コード） ---
-PlayerTab:AddToggle({ 
-    Name = "Enable TPS (Max 500 Studs)", 
-    Default = false, 
-    Callback = function(Value) 
-        _G.TPSToggle = Value 
-        if not Value and player then 
-            player.CameraMode = Enum.CameraMode.Classic 
-            player.CameraMaxZoomDistance = 12 
-            player.CameraMinZoomDistance = 0.5 
-        end 
-    end 
-})
+-- [[ 🔗 あなたのGitHubのRaw URL（修正済みでそのまま動きます） ]]
+local ORION_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/orion_ui.lua"
+local RAYFIELD_SCRIPT_URL = "https://raw.githubusercontent.com/adayoooooooo/KTM_HUB/refs/heads/main/rayfield_ui.lua"
 
--- --- テレポートボタン（既存コード） ---
-TeleportTab:AddButton({
-    Name = "Teleport Behind Player",
-    Callback = function()
-        if SelectedPlayerName ~= "" then
-            local targetPlayer = Players:FindFirstChild(SelectedPlayerName)
-            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    player.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-                end
-            end
-        end
-    end
-})
+-- [[ 🛑 共通グローバル変数宣言 ]]
+local player = game.Players.LocalPlayer
+_G.WalkspeedOverride = false
+_G.SpeedMultiplier = 1
+_G.JumpPowerOverride = false
+_G.JumpMultiplier = 1
+_G.InfiniteJump = false
+_G.TPSToggle = false
 
--- --- Defense タブ ---
--- --- Defense タブの強化版処理 ---
-local RS = game:GetService("ReplicatedStorage")
-local R = game:GetService("RunService")
-local CE = RS:WaitForChild("CharacterEvents", 5) 
-local StruggleEvent = CE and CE:WaitForChild("Struggle", 5)
-local BeingHeld = player:WaitForChild("IsHeld", 5)
-
-local AntiExplosionEnabled = true
-local AntiGrabEnabled = true
-local AntiSitEnabled = true
-
--- 爆発対策
-workspace.DescendantAdded:Connect(function(v) 
-    if AntiExplosionEnabled and v:IsA("Explosion") then 
-        v.BlastPressure = 0 
-    end 
-end)
-
--- 【強化ポイント】RenderStepped よりも物理演算に近い頻度で強力にループ
-R.Heartbeat:Connect(function()
-    if not AntiGrabEnabled then return end
-    
-    local char = player.Character
-    if not char then return end
-    
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChild("Humanoid")
-    
-    -- 1. 掴まれているフラグがON、またはキャラクター内に掴み用のWeld（結合パーツ）が存在するかチェック
-    local physicalGrab = char:FindFirstChildOfClass("Weld") or char:FindFirstChildOfClass("WeldConstraint")
-    
-    if (BeingHeld and BeingHeld.Value == true) or physicalGrab then
-        -- 速度をゼロにして引っ張られるのを防ぐ
-        if hrp then
-            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-            hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-        end
-        
-        -- 2. サーバーへもがく（Struggle）イベントを高速連打
-        if StruggleEvent then
-            StruggleEvent:FireServer(player)
-        end
-        
-        -- 3. 【強制解除】ローカル側で掴みパーツや結合を即座に破壊（クライアント側で位置を固定化させない）
-        if physicalGrab then
-            physicalGrab:Destroy()
-        end
-        
-        -- 4. 人型ステートを強制リセットして拘束アニメーションを解く
-        if hum then
-            hum:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+-- ==========================================
+-- 🌐 ループ・イベント処理（バックエンド）
+-- ==========================================
+local UserInputService = game:GetService("UserInputService")
+UserInputService.JumpRequest:Connect(function()
+    if _G.InfiniteJump and player.Character then
+        local humanoid = player.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
 end)
 
--- キャラクターが生成された際の処理（Anti-Sitなど）
-local function reconnect(Character)
-    if not Character then return end
-    local Humanoid = Character:WaitForChild("Humanoid", 10)
-    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart", 10)
-    
-    if HumanoidRootPart then 
-        local firePart = HumanoidRootPart:WaitForChild("FirePlayerPart", 3) 
-        if firePart then firePart:Destroy() end 
-    end
-    
-    if Humanoid then
-        Humanoid.Changed:Connect(function(C)
-            if AntiSitEnabled and C == "Sit" and Humanoid.Sit == true then
-                if Humanoid.SeatPart ~= nil and tostring(Humanoid.SeatPart.Parent) == "CreatureBlobman" then
-                    -- 特定の乗り物は許可
-                elseif Humanoid.SeatPart == nil then 
-                    Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true) 
-                    Humanoid.Sit = false 
-                end
-            end
-        end)
-    end
-end
-
-if player.Character then task.spawn(reconnect, player.Character) end
-player.CharacterAdded:Connect(function(char) task.spawn(reconnect, char) end)
-
--- UIへの登録
-DefenseTab:AddToggle({ Name = "Anti Explosion (No Knockback)", Default = true, Callback = function(Value) AntiExplosionEnabled = Value end })
-DefenseTab:AddToggle({ Name = "Anti Grab (Auto Struggle)", Default = true, Callback = function(Value) AntiGrabEnabled = Value end })
-DefenseTab:AddToggle({ Name = "Anti Sit (Auto Unsit)", Default = true, Callback = function(Value) AntiSitEnabled = Value end })
-
-local SelectedBlobmanTarget = "" -- キック対象のプレイヤー名
-local BlobmanKickLoop = false    -- ループフラグ
-
--- おもちゃの出現・削除用リモート（添付ファイル内の定義を流用）
-local SpawnToyRF = game:GetService("ReplicatedStorage"):WaitForChild("MenuToys"):WaitForChild("SpawnToyRemoteFunction")
-local DeleteToyRE = game:GetService("ReplicatedStorage"):WaitForChild("MenuToys"):WaitForChild("DestroyToy")
-
--- --- ドロップダウンデータ生成（Blobman用） ---
-local function GetBlobmanDropdownData()
-    local displayList = {}
-    local nameMap = {} 
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= player then
-            local formattedName = p.DisplayName .. " (@" .. p.Name .. ")"
-            table.insert(displayList, formattedName)
-            nameMap[formattedName] = p.Name
+game:GetService("RunService").Heartbeat:Connect(function()
+    if player then
+        if _G.TPSToggle then
+            player.CameraMode = Enum.CameraMode.Classic
+            player.CameraMaxZoomDistance = 500
+            player.CameraMinZoomDistance = 0.5
+        else
+            player.CameraMode = Enum.CameraMode.LockFirstPerson
+            player.CameraMaxZoomDistance = 0.5
+            player.CameraMinZoomDistance = 0.5
         end
     end
-    return displayList, nameMap
-end
-local bDisplayList, bNameMap = GetBlobmanDropdownData()
 
--- 対象プレイヤー選択ドロップダウン
-local BlobmanTargetDropdown = BlobmanTab:AddDropdown({
-    Name = "Select Target Player", 
-    Default = "None", 
-    Options = bDisplayList,
-    Callback = function(Value) 
-        SelectedBlobmanTarget = bNameMap[Value] or "" 
-    end
-})
-
--- 【リフレッシュボタン】プレイヤーリストを手動で更新する
-BlobmanTab:AddButton({
-    Name = "Refresh Player List",
-    Callback = function()
-        local newList, newMap = GetBlobmanDropdownData()
-        bNameMap = newMap
-        BlobmanTargetDropdown:Refresh(newList, true)
-    end
-})
-
--- スパムキックのトグルスイッチ
-BlobmanTab:AddToggle({
-    Name = "Blobman Spam Kick",
-    Default = false,
-    Callback = function(Value)
-        BlobmanKickLoop = Value
+    if player and player.Character then
+        local humanoid = player.Character:FindFirstChild("Humanoid")
+        local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
         
-        if Value then
-            -- 選択されたプレイヤーが有効かチェック
-            if SelectedBlobmanTarget == "" then 
-                OrionLibrary:MakeNotification({Name = "Error", Content = "対象プレイヤーを選択してください", Time = 3})
-                return 
+        if humanoid and rootPart then
+            if _G.WalkspeedOverride and humanoid.MoveDirection.Magnitude > 0 then
+                local currentVelocity = rootPart.AssemblyLinearVelocity
+                local targetMove = humanoid.MoveDirection * (16 * _G.SpeedMultiplier)
+                rootPart.AssemblyLinearVelocity = Vector3.new(targetMove.X, currentVelocity.Y, targetMove.Z)
             end
             
-            local targetPlayer = Players:FindFirstChild(SelectedBlobmanTarget)
-            if not targetPlayer or not targetPlayer.Character then 
-                OrionLibrary:MakeNotification({Name = "Error", Content = "対象プレイヤーが見つかりません", Time = 3})
-                return 
+            if _G.JumpPowerOverride then
+                humanoid.UseJumpPower = true
+                humanoid.JumpPower = 0 * _G.JumpMultiplier
+            else
+                humanoid.UseJumpPower = false
             end
-
-            -- 高速ループ処理を開始
-            task.spawn(function()
-                while BlobmanKickLoop do
-                    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                        local targetHRP = targetPlayer.Character.HumanoidRootPart
-                        
-                        -- 対象プレイヤーの座標の少し上にBlobmanを出現させる引数
-                        -- 添付ファイルの構造: {"おもちゃ名", CFrame位置, Vector3角度}
-                        local spawnArgs = {
-                            "CreatureBlobman", 
-                            targetHRP.CFrame * CFrame.new(0, 3, 0), 
-                            Vector3.new(0, 0, 0)
-                        }
-                        
-                        -- クライアント側からサーバーへ出現命令（別スレッドでラグを軽減）
-                        task.spawn(function()
-                            local spawnedToy = SpawnToyRF:InvokeServer(unpack(spawnArgs))
-                            
-                            -- 出現に成功した場合、あるいは自分のおもちゃフォルダに生成されたら即座に消去する
-                            if spawnedToy then
-                                DeleteToyRE:FireServer(spawnedToy)
-                            end
-                        end)
-                        
-                        -- 自分の生成したおもちゃフォルダ内を走査して、残骸が残っていれば強制全削除（スパム効率アップ）
-                        local myToysFolder = workspace:FindFirstChild(player.Name .. "SpawnedInToys")
-                        if myToysFolder then
-                            for _, toy in ipairs(myToysFolder:GetChildren()) do
-                                if toy.Name == "CreatureBlobman" then
-                                    DeleteToyRE:FireServer(toy)
-                                end
-                            end
-                        end
-                    else
-                        -- 対象がサーバーにいない、または死んでいる場合はループを一時待機
-                        break
-                    end
-                    
-                    -- 連打のウェイト（極限まで短く設定、環境に応じて調整してください）
-                    task.wait(0.01) 
-                end
-            end)
         end
     end
-})
+end)
 
-OrionLibrary:Init()
+-- ==========================================
+-- 🖥️ 選択用独自UI（ランチャー画面）
+-- ==========================================
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local OrionBtn = Instance.new("TextButton")
+local RayfieldBtn = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local UICorner2 = Instance.new("UICorner")
+local UICorner3 = Instance.new("UICorner")
+
+ScreenGui.Name = "UI_Launcher"
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+MainFrame.Size = UDim2.new(0, 300, 0, 150)
+
+UICorner.Parent = MainFrame
+
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1.000
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "KTM HUB - Select UI Library"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 16.000
+
+-- 【Orion UI 選択ボタン】
+OrionBtn.Name = "OrionBtn"
+OrionBtn.Parent = MainFrame
+OrionBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+OrionBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
+OrionBtn.Size = UDim2.new(0.42, 0, 0, 45)
+OrionBtn.Font = Enum.Font.Gotham
+OrionBtn.Text = "Orion UI"
+OrionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OrionBtn.TextSize = 14.000
+UICorner2.Parent = OrionBtn
+
+-- 【Rayfield UI 選択ボタン】
+RayfieldBtn.Name = "RayfieldBtn"
+RayfieldBtn.Parent = MainFrame
+RayfieldBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+RayfieldBtn.Position = UDim2.new(0.53, 0, 0.45, 0)
+RayfieldBtn.Size = UDim2.new(0.42, 0, 0, 45)
+RayfieldBtn.Font = Enum.Font.Gotham
+RayfieldBtn.Text = "Rayfield UI"
+RayfieldBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+RayfieldBtn.TextSize = 14.000
+UICorner3.Parent = RayfieldBtn
+
+-- ==========================================
+-- 🚀 UI 起動処理
+-- ==========================================
+OrionBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+    local success, err = pcall(function()
+        loadstring(game:HttpGet(ORION_SCRIPT_URL))()
+    end)
+    if not success then
+        warn("Orionのロードに失敗しました: " .. tostring(err))
+    end
+end)
+
+RayfieldBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+    local success, err = pcall(function()
+        loadstring(game:HttpGet(RAYFIELD_SCRIPT_URL))()
+    end)
+    if not success then
+        warn("Rayfieldのロードに失敗しました: " .. tostring(err))
+    end
+end)
