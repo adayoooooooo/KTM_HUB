@@ -44,7 +44,7 @@ PlayerTab:AddToggle({ Name = "JumpPowerOverride", Default = false, Callback = fu
 PlayerTab:AddSlider({ Name = "Jump Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Callback = function(Value) _G.JumpMultiplier = Value end })
 PlayerTab:AddToggle({ Name = "Infinite Jump", Default = false, Callback = function(Value) _G.InfiniteJump = Value end })
 
--- --- Vfly用コントロール (UI完結型・高さの上げ下げ削除版) ---
+-- --- Vfly用コントロール (カメラ方向のみ・上下強制固定版) ---
 PlayerTab:AddToggle({
     Name = "Vfly (Vehicle Fly)",
     Default = false,
@@ -68,15 +68,17 @@ PlayerTab:AddToggle({
                 
                 if not targetPart then return end
 
+                -- 回転をカメラに完全に固定（ガチガチにロック）
                 BodyGyro = Instance.new("BodyGyro")
-                BodyGyro.P = 9e4
+                BodyGyro.P = 500000 -- 力を大幅に強化
                 BodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
                 BodyGyro.cframe = targetPart.CFrame
                 BodyGyro.Parent = targetPart
 
+                -- 速度の制御オブジェクト
                 BodyVelocity = Instance.new("BodyVelocity")
                 BodyVelocity.velocity = Vector3.new(0, 0, 0)
-                BodyVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9)
+                BodyVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9) -- 乗り物の重量に負けない強さ
                 BodyVelocity.Parent = targetPart
 
                 FlyConnection = RunService.RenderStepped:Connect(function()
@@ -85,13 +87,19 @@ PlayerTab:AddToggle({
                         return
                     end
 
+                    -- 乗り物に乗っている場合、ゲーム側の勝手な下向きの物理を打ち消す
+                    if humanoid and humanoid.SeatPart then
+                        targetPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                        targetPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                    end
+
                     local cameraCFrame = workspace.CurrentCamera.CFrame
                     BodyGyro.cframe = cameraCFrame
 
                     local UserInputService = game:GetService("UserInputService")
                     local direction = Vector3.new(0, 0, 0)
 
-                    -- 【変更ポイント】W/A/S/D のみの純粋なカメラ方向移動に変更（Space/Shiftを削除）
+                    -- W/A/S/D のみの入力を取得
                     if UserInputService:IsKeyDown(Enum.KeyCode.W) then
                         direction = direction + cameraCFrame.LookVector
                     end
@@ -105,6 +113,7 @@ PlayerTab:AddToggle({
                         direction = direction + cameraCFrame.RightVector
                     end
 
+                    -- 動いていない時は完全に「0」で固定して、勝手な上昇・降下を防ぐ
                     if direction.Magnitude > 0 then
                         BodyVelocity.velocity = direction.Unit * FlySpeed
                     else
@@ -121,19 +130,6 @@ PlayerTab:AddToggle({
                 end
             end
         end
-    end
-})
-
-PlayerTab:AddSlider({
-    Name = "Fly Speed",
-    Min = 50,
-    Max = 300,
-    Default = 50,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 5,
-    ValueName = "Studs/s",
-    Callback = function(Value)
-        FlySpeed = Value
     end
 })
 
