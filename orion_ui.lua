@@ -44,7 +44,7 @@ PlayerTab:AddToggle({ Name = "JumpPowerOverride", Default = false, Callback = fu
 PlayerTab:AddSlider({ Name = "Jump Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Callback = function(Value) _G.JumpMultiplier = Value end })
 PlayerTab:AddToggle({ Name = "Infinite Jump", Default = false, Callback = function(Value) _G.InfiniteJump = Value end })
 
--- --- Vfly用コントロール (UI完結型・乗り物維持版) ---
+-- --- Vfly用コントロール (UI完結型・高さの上げ下げ削除版) ---
 PlayerTab:AddToggle({
     Name = "Vfly (Vehicle Fly)",
     Default = false,
@@ -75,7 +75,7 @@ PlayerTab:AddToggle({
                 BodyGyro.Parent = targetPart
 
                 BodyVelocity = Instance.new("BodyVelocity")
-                BodyVelocity.velocity = Vector3.new(0, 0.1, 0)
+                BodyVelocity.velocity = Vector3.new(0, 0, 0)
                 BodyVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9)
                 BodyVelocity.Parent = targetPart
 
@@ -91,6 +91,7 @@ PlayerTab:AddToggle({
                     local UserInputService = game:GetService("UserInputService")
                     local direction = Vector3.new(0, 0, 0)
 
+                    -- 【変更ポイント】W/A/S/D のみの純粋なカメラ方向移動に変更（Space/Shiftを削除）
                     if UserInputService:IsKeyDown(Enum.KeyCode.W) then
                         direction = direction + cameraCFrame.LookVector
                     end
@@ -103,12 +104,6 @@ PlayerTab:AddToggle({
                     if UserInputService:IsKeyDown(Enum.KeyCode.D) then
                         direction = direction + cameraCFrame.RightVector
                     end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                        direction = direction + Vector3.new(0, 1, 0)
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                        direction = direction - Vector3.new(0, 1, 0)
-                    end
 
                     if direction.Magnitude > 0 then
                         BodyVelocity.velocity = direction.Unit * FlySpeed
@@ -118,7 +113,6 @@ PlayerTab:AddToggle({
                 end)
             end)
         else
-            -- 【修正ポイント】オフにされた時、シートに座っていなければステートを戻す
             local char = player.Character
             if char then
                 local hum = char:FindFirstChildOfClass("Humanoid")
