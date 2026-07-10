@@ -26,7 +26,7 @@ local SelectedBlobmanTarget = ""
 
 -- --- 自作Vfly用の変数 ---
 local FlyEnabled = false
-local FlySpeed = 1
+local FlySpeed = 5
 local FlyConnection = nil
 local BodyGyro = nil
 local BodyVelocity = nil
