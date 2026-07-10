@@ -126,7 +126,7 @@ PlayerTab:AddToggle({
                     end
 
                     if direction.Magnitude > 0 then
-                        BodyVelocity.velocity = direction.Unit * FlySpeed * 16
+                        BodyVelocity.velocity = direction.Unit * (16 * FlySpeed)
                     else
                         BodyVelocity.velocity = Vector3.new(0, 0, 0)
                     end
