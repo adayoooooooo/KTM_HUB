@@ -389,12 +389,37 @@ BlobmanTab:AddToggle({
     end
 })
 
--- --- Save タブ (エラー修正版) ---
+-- --- Save タブ (JSONによる独自セーブ＆ロード) ---
 local SaveTab = Window:MakeTab({ Name = "Save", Icon = "rbxassetid://7734053495", PremiumOnly = false })
 
-local SavedFilesList = {"default"} -- ドロップダウン表示用のファイル一覧
-local SelectedFileName = "default"  -- 現在選択されているファイル名
-local InputFileNameText = ""        -- テキストボックスに入力されたテキスト
+local HttpService = game:GetService("HttpService")
+local CONFIG_DIR = "TestHUB_Configs/" -- 保存するフォルダ名
+
+-- フォルダがなければ作成 (Executorの機能)
+if makefolder then
+    pcall(function() makefolder(CONFIG_DIR) end)
+end
+
+-- ファイル一覧を取得する関数
+local function GetSavedFiles()
+    local files = {"default"}
+    if listfiles then
+        pcall(function()
+            for _, path in ipairs(listfiles(CONFIG_DIR)) do
+                -- パスからファイル名だけを抽出 (.json を消す)
+                local name = path:match("([^/]+)%.json$") or path:match("([^\\]+)%.json$")
+                if name and name ~= "default" then
+                    table.insert(files, name)
+                end
+            end
+        end)
+    end
+    return files
+end
+
+local SavedFilesList = GetSavedFiles()
+local SelectedFileName = "default"
+local InputFileNameText = ""
 
 -- ファイル選択ドロップダウン
 local FileDropdown = SaveTab:AddDropdown({
@@ -416,7 +441,7 @@ SaveTab:AddTextbox({
     end
 })
 
--- New File ボタン
+-- New File ボタン (新規リスト追加)
 SaveTab:AddButton({
     Name = "New File",
     Callback = function()
@@ -443,46 +468,88 @@ SaveTab:AddButton({
     end
 })
 
--- Save File ボタン (Window オブジェクトを使用するように修正)
+-- Save File ボタン (writefile による独自保存)
 SaveTab:AddButton({
     Name = "Save File",
     Callback = function()
         local finalSaveName = (InputFileNameText ~= "") and InputFileNameText or SelectedFileName
-        
-        if finalSaveName and finalSaveName ~= "" then
-            -- OrionLibraryの仕様に合わせて、WindowのConfig機能を使って保存
-            -- ※Orionのネイティブ保存機能はWindow作成時のConfigFolderに紐づくため、
-            -- 内部の設定データを書き出す処理を実行します
-            pcall(function()
-                -- Orionの自動セーブ機能をトリガーする、または設定ファイルを強制書き込み
-                -- (OrionLibrary自体にセーブ用関数が無い場合はWindowの機能を使用します)
-                if Window.Flags then
-                    -- Orionの内部仕様に合わせたセーブ処理
-                    for flag, target in pairs(OrionLibrary.Flags) do
-                        -- 各フラグの値を保存（OrionLibrary自体がSaveConfigを自動で行うため、通知のみで対応できる場合があります）
-                    end
+        if not finalSaveName or finalSaveName == "" then return end
+
+        if writefile then
+            local configData = {}
+            -- OrionLibraryのFlagsから現在のUIの状態（トグルやスライダーの値）をすべて抽出
+            for flag, value in pairs(OrionLibrary.Flags) do
+                -- 型が保存可能なもの（bool, number, string等）だけを対象にする
+                if type(value) ~= "function" and type(value) ~= "table" then
+                    configData[flag] = value
                 end
-            end)
-            
-            OrionLibrary:MakeNotification({
-                Name = "Config Saved",
-                Content = "設定を保存しました: " .. finalSaveName,
-                Time = 3
-            })
+            end
+
+            local success, jsonStr = pcall(function() return HttpService:JSONEncode(configData) end)
+            if success then
+                writefile(CONFIG_DIR .. finalSaveName .. ".json", jsonStr)
+                
+                -- リストを更新
+                SavedFilesList = GetSavedFiles()
+                FileDropdown:Refresh(SavedFilesList, false)
+                
+                OrionLibrary:MakeNotification({
+                    Name = "Config Saved",
+                    Content = "設定を保存しました: " .. finalSaveName,
+                    Time = 3
+                })
+            else
+                OrionLibrary:MakeNotification({Name = "Error", Content = "データの変換に失敗しました", Time = 3})
+            end
+        else
+            OrionLibrary:MakeNotification({Name = "Error", Content = "お使いのExecutorはファイルの保存に対応していません", Time = 3})
         end
     end
 })
 
--- Load File ボタン
+-- Load File ボタン (readfile と OrionLibrary:ChangeValue による値の復元)
 SaveTab:AddButton({
     Name = "Load File",
     Callback = function()
-        if SelectedFileName and SelectedFileName ~= "" then
-            OrionLibrary:MakeNotification({
-                Name = "Config Loaded",
-                Content = "設定を読み込みました: " .. SelectedFileName,
-                Time = 3
-            })
+        if not SelectedFileName or SelectedFileName == "" then return end
+
+        if readfile then
+            local filePath = CONFIG_DIR .. SelectedFileName .. ".json"
+            -- ファイルが存在するか確認
+            local fileExists = pcall(function() return readfile(filePath) end)
+            
+            if fileExists then
+                local jsonStr = readfile(filePath)
+                local success, configData = pcall(function() return HttpService:JSONDecode(jsonStr) end)
+                
+                if success and type(configData) == "table" then
+                    -- 保存されたデータをOrionのUIに反映させる
+                    for flag, value in pairs(configData) do
+                        pcall(function()
+                            -- Orionの各パーツに値をセットし、Callbackを実行させる
+                            OrionLibrary.Flags[flag] = value
+                            -- UI上の見た目を更新するOrionの内部関数を呼び出す
+                            local options = OrionLibrary.Flags[flag]
+                            -- 各トグルやスライダーに登録されたフラグへ値を強制代入
+                            if OrionLibrary.Objects[flag] then
+                                OrionLibrary.Objects[flag]:Set(value)
+                            end
+                        end)
+                    end
+                    
+                    OrionLibrary:MakeNotification({
+                        Name = "Config Loaded",
+                        Content = "設定を読み込みました: " .. SelectedFileName,
+                        Time = 3
+                    })
+                else
+                    OrionLibrary:MakeNotification({Name = "Error", Content = "ファイルの読み込みに失敗しました", Time = 3})
+                end
+            else
+                OrionLibrary:MakeNotification({Name = "Error", Content = "ファイルが見つかりません (一度Saveしてください)", Time = 3})
+            end
+        else
+            OrionLibrary:MakeNotification({Name = "Error", Content = "お使いのExecutorはファイルの読み込みに対応していません", Time = 3})
         end
     end
 })
