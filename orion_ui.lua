@@ -389,4 +389,100 @@ BlobmanTab:AddToggle({
     end
 })
 
+-- --- Save タブ (新規追加) ---
+local SaveTab = Window:MakeTab({ Name = "Save", Icon = "rbxassetid://7734053495", PremiumOnly = false })
+
+local SavedFilesList = {"default"} -- ドロップダウン表示用のファイル一覧
+local SelectedFileName = "default"  -- 現在選択されているファイル名
+local InputFileNameText = ""        -- インプットボックスに入力されたテキスト
+
+-- ファイル選択ドロップダウン
+local FileDropdown = SaveTab:AddDropdown({
+    Name = "Select File",
+    Default = "default",
+    Options = SavedFilesList,
+    Callback = function(Value)
+        SelectedFileName = Value
+    end
+})
+
+-- ファイル名入力インプットボックス
+SaveTab:AddInput({
+    Name = "File Name Input",
+    Default = "",
+    PlaceholderText = "Enter file name here...",
+    ClearTextOnFocus = false,
+    Callback = function(Value)
+        InputFileNameText = Value
+    end
+})
+
+-- New File ボタン (新規作成・リスト追加)
+SaveTab:AddButton({
+    Name = "New File",
+    Callback = function()
+        if InputFileNameText ~= "" then
+            -- 重複チェックをしてからリストに追加
+            local exists = false
+            for _, name in ipairs(SavedFilesList) do
+                if name == InputFileNameText then
+                    exists = true
+                    break
+                end
+            end
+            
+            if not exists then
+                table.insert(SavedFilesList, InputFileNameText)
+                SelectedFileName = InputFileNameText
+                -- ドロップダウンの表示を更新して新規追加したファイルを選択状態にする
+                FileDropdown:Refresh(SavedFilesList, true)
+                OrionLibrary:MakeNotification({Name = "Success", Content = "新規ファイル名を追加しました: " .. InputFileNameText, Time = 3})
+            else
+                OrionLibrary:MakeNotification({Name = "Warning", Content = "その名前は既に存在します", Time = 3})
+            end
+        else
+            OrionLibrary:MakeNotification({Name = "Error", Content = "ファイル名を入力してください", Time = 3})
+        end
+    end
+})
+
+-- Save File ボタン (現在選択されているファイル名、または入力された名前で保存)
+SaveTab:AddButton({
+    Name = "Save File",
+    Callback = function()
+        -- インプットボックスが空でなければそちらを優先、空ならドロップダウンの選択名を使用
+        local finalSaveName = (InputFileNameText ~= "") and InputFileNameText or SelectedFileName
+        
+        if finalSaveName and finalSaveName ~= "" then
+            -- OrionLibraryの内部フラグを指定したファイル名に変更してセーブを実行
+            OrionLibrary.ConfigFolder = "TestHUB_" .. finalSaveName
+            OrionLibrary:SaveConfig()
+            
+            OrionLibrary:MakeNotification({
+                Name = "Config Saved",
+                Content = "設定を保存しました: " .. finalSaveName,
+                Time = 3
+            })
+        end
+    end
+})
+
+-- Load File ボタン (ドロップダウンで選択されているファイルを読み込み)
+SaveTab:AddButton({
+    Name = "Load File",
+    Callback = function()
+        if SelectedFileName and SelectedFileName ~= "" then
+            -- 読み込みたいファイルのフォルダ名に切り替えてロードを実行
+            OrionLibrary.ConfigFolder = "TestHUB_" .. SelectedFileName
+            OrionLibrary:LoadConfig()
+            
+            OrionLibrary:MakeNotification({
+                Name = "Config Loaded",
+                Content = "設定を読み込みました: " .. SelectedFileName,
+                Time = 3
+            })
+        end
+    end
+})
+
 OrionLibrary:Init()
