@@ -2,7 +2,6 @@ local OrionLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
-local mouse = player:GetMouse()
 
 _G.WalkspeedOverride = false
 _G.SpeedMultiplier = 1
