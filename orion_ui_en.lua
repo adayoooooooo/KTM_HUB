@@ -32,13 +32,17 @@ local Window = OrionLibrary:MakeWindow({
     FreeMouse = true
 })
 
-local TextChatService = game:GetService("TextChatService")
-local textChannels = TextChatService:FindFirstChild("TextChannels")
-local generalChannel = textChannels and textChannels:FindFirstChild("RBXGeneral")
+-- 💡 他言語から起動された（_G.SkipChatLog が true）場合はチャットを送らない
+if not _G.SkipChatLog then
+    local TextChatService = game:GetService("TextChatService")
+    local textChannels = TextChatService:FindFirstChild("TextChannels")
+    local generalChannel = textChannels and textChannels:FindFirstChild("RBXGeneral")
 
-if generalChannel then
-    generalChannel:SendAsync("(＃°Д°)HUB by 自作テスター,初心者チーター(公開鯖テスト)起動完了(•ω•)")
+    if generalChannel then
+        generalChannel:SendAsync("(＃°Д°)HUB by 自作テスター,初心者チーター(公開鯖テスト)起動完了(•ω•)")
+    end
 end
+_G.SkipChatLog = nil -- 次回のためにリセット
 
 local SelectedPlayerName = ""      
 local SelectedBlobmanTarget = ""   
@@ -49,12 +53,13 @@ local TeleportTab = Window:MakeTab({ Name = "Teleport", Icon = "rbxassetid://773
 local DefenseTab = Window:MakeTab({ Name = "Defense", Icon = "rbxassetid://7734056608", PremiumOnly = false })
 local BlobmanTab = Window:MakeTab({ Name = "Blobman", Icon = "rbxassetid://13585613884", PremiumOnly = false })
 
-otherlanguage:AddButton({Name = "JP版起動", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/adayoooooooo/Test-HUB/refs/heads/main/orion_ui_jp.lua"))() end})
-_G.O_WalkspeedOverride = PlayerTab:AddToggle({ Name = "Walkspeed Override", Default = false, Flag = "Flag_WalkspeedOverride", Callback = function(Value) if not IsLoadingConfig then _G.WalkspeedOverride = Value end end })
-_G.O_SpeedMultiplier = PlayerTab:AddSlider({ Name = "Speed Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Speed", Flag = "Flag_SpeedMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.SpeedMultiplier = Value end end })
-_G.O_JumpPowerOverride = PlayerTab:AddToggle({ Name = "Jump Power Override", Default = false, Flag = "Flag_JumpPowerOverride", Callback = function(Value) if not IsLoadingConfig then _G.JumpPowerOverride = Value end end })
-_G.O_JumpMultiplier = PlayerTab:AddSlider({ Name = "Jump Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Flag = "Flag_JumpMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.JumpMultiplier = Value end end })
-_G.O_InfiniteJump = PlayerTab:AddToggle({ Name = "Infinite Jump", Default = false, Flag = "Flag_InfiniteJump", Callback = function(Value) if not IsLoadingConfig then _G.InfiniteJump = Value end end })
+-- 💡 ボタンを押した時は目印を true にしてから読み込む
+otherlanguage:AddButton({Name = "JP版起動", Callback = function() _G.SkipChatLog = true loadstring(game:HttpGet("https://raw.githubusercontent.com/adayoooooooo/Test-HUB/refs/heads/main/orion_ui_jp.lua"))() end})
+_G.O_WalkspeedOverride = PlayerTab:AddToggle({ Name = "Walkspeed Override", Default = false, Flag = "Flag_WalkspeedOverride", Callback = function(Value) if not IsLoadingConfig then _G.WalkspeedOverride = Value end end })[cite: 1]
+_G.O_SpeedMultiplier = PlayerTab:AddSlider({ Name = "Speed Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Speed", Flag = "Flag_SpeedMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.SpeedMultiplier = Value end end })[cite: 1]
+_G.O_JumpPowerOverride = PlayerTab:AddToggle({ Name = "Jump Power Override", Default = false, Flag = "Flag_JumpPowerOverride", Callback = function(Value) if not IsLoadingConfig then _G.JumpPowerOverride = Value end end })[cite: 1]
+_G.O_JumpMultiplier = PlayerTab:AddSlider({ Name = "Jump Multiplier", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Flag = "Flag_JumpMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.JumpMultiplier = Value end end })[cite: 1]
+_G.O_InfiniteJump = PlayerTab:AddToggle({ Name = "Infinite Jump", Default = false, Flag = "Flag_InfiniteJump", Callback = function(Value) if not IsLoadingConfig then _G.InfiniteJump = Value end end })[cite: 1]
 
 _G.O_VflyToggle = PlayerTab:AddToggle({
     Name = "Vfly (Vehicle Fly)",
