@@ -55,12 +55,11 @@ local BlobmanTab = Window:MakeTab({ Name = "Blobman", Icon = "rbxassetid://13585
 
 -- 💡 ボタンを押した時は目印を true にしてから読み込む
 otherlanguage:AddButton({Name = "Launch English version", Callback = function() _G.SkipChatLog = true loadstring(game:HttpGet("https://raw.githubusercontent.com/adayoooooooo/Test-HUB/refs/heads/main/orion_ui_en.lua"))() end})
-_G.O_WalkspeedOverride = PlayerTab:AddToggle({ Name = "歩行速度変更 (Walkspeed)", Default = false, Flag = "Flag_WalkspeedOverride", Callback = function(Value) if not IsLoadingConfig then _G.WalkspeedOverride = Value end end })[cite: 2]
-_G.O_SpeedMultiplier = PlayerTab:AddSlider({ Name = "速度倍率", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Speed", Flag = "Flag_SpeedMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.SpeedMultiplier = Value end end })[cite: 2]
-_G.O_JumpPowerOverride = PlayerTab:AddToggle({ Name = "ジャンプ力変更 (JumpPower)", Default = false, Flag = "Flag_JumpPowerOverride", Callback = function(Value) if not IsLoadingConfig then _G.JumpPowerOverride = Value end end })[cite: 2]
-_G.O_JumpMultiplier = PlayerTab:AddSlider({ Name = "ジャンプ力倍率", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Flag = "Flag_JumpMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.JumpMultiplier = Value end end })[cite: 2]
-_G.O_InfiniteJump = PlayerTab:AddToggle({ Name = "無限ジャンプ", Default = false, Flag = "Flag_InfiniteJump", Callback = function(Value) if not IsLoadingConfig then _G.InfiniteJump = Value end end })[cite: 2]
-
+_G.O_WalkspeedOverride = PlayerTab:AddToggle({ Name = "歩行速度変更 (Walkspeed)", Default = false, Flag = "Flag_WalkspeedOverride", Callback = function(Value) if not IsLoadingConfig then _G.WalkspeedOverride = Value end end })
+_G.O_SpeedMultiplier = PlayerTab:AddSlider({ Name = "速度倍率", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Speed", Flag = "Flag_SpeedMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.SpeedMultiplier = Value end end })
+_G.O_JumpPowerOverride = PlayerTab:AddToggle({ Name = "ジャンプ力変更 (JumpPower)", Default = false, Flag = "Flag_JumpPowerOverride", Callback = function(Value) if not IsLoadingConfig then _G.JumpPowerOverride = Value end end })
+_G.O_JumpMultiplier = PlayerTab:AddSlider({ Name = "ジャンプ力倍率", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Jump", Flag = "Flag_JumpMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.JumpMultiplier = Value end end })
+_G.O_InfiniteJump = PlayerTab:AddToggle({ Name = "無限ジャンプ", Default = false, Flag = "Flag_InfiniteJump", Callback = function(Value) if not IsLoadingConfig then _G.InfiniteJump = Value end end })
 _G.O_VflyToggle = PlayerTab:AddToggle({
     Name = "Vfly (乗り物飛行)",
     Default = false,
