@@ -38,7 +38,7 @@ if not _G.SkipChatLog then
     local generalChannel = textChannels and textChannels:FindFirstChild("RBXGeneral")
 
     if generalChannel then
-        generalChannel:SendAsync("(＃°Д°)HUB by 自作テスター,初心者チーター(公開鯖テスト)起動完了(•ω•)")
+        generalChannel:SendAsync("(＃°Д°)HUB by 自作テスター、初心者チーター")
     end
 end
 _G.SkipChatLog = nil
