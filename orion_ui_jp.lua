@@ -41,8 +41,7 @@ local TeleportTab = Window:MakeTab({ Name = "テレポート", Icon = "rbxasseti
 local DefenseTab = Window:MakeTab({ Name = "防衛", Icon = "rbxassetid://7734056608", PremiumOnly = false })
 local BlobmanTab = Window:MakeTab({ Name = "Blobman", Icon = "rbxassetid://13585613884", PremiumOnly = false })
 
--- ボタンを押した時は目印を true にしてから読み込む
-otherlanguage:AddButton({Name = "Launch English version", Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/adayoooooooo/Test-HUB/refs/heads/main/orion_ui_en.lua"))() end})
+otherlanguage:AddButton({Name = "Launch English version", Callback = function() _G.SkipChatLog = true loadstring(game:HttpGet("https://raw.githubusercontent.com/adayoooooooo/Test-HUB/refs/heads/main/orion_ui_en.lua"))() end})
 
 _G.O_WalkspeedOverride = PlayerTab:AddToggle({ Name = "歩行速度変更 (Walkspeed)", Default = false, Flag = "Flag_WalkspeedOverride", Callback = function(Value) if not IsLoadingConfig then _G.WalkspeedOverride = Value end end })
 _G.O_SpeedMultiplier = PlayerTab:AddSlider({ Name = "速度倍率", Min = 1, Max = 10, Default = 1, Color = Color3.fromRGB(255,255,255), Increment = 1, ValueName = "Speed", Flag = "Flag_SpeedMultiplier", Callback = function(Value) if not IsLoadingConfig then _G.SpeedMultiplier = Value end end })
